@@ -216,18 +216,14 @@ export const proposeFollowup = defineChannelTool({
             : `⏸ Holding the follow-up for ${person}…`,
         );
         settled = true;
-        // Detached: the click ack must not wait on Ambiguous. The final
-        // update lands when the writes finish.
-        void (async () => {
-          const outcome = approved
-            ? await fileToWorkspace(person, draft, context)
-            : "Held by the responder. Nothing was filed.";
-          await ctx.thread.update(
-            ctx.message.ref,
-            `${approved ? "✅ Approved." : "⏸ Held."} ${outcome}\n\n*Draft for ${person}:*\n${draft}`,
-          );
-        })().catch((err) =>
-          console.error("[followup] decision report failed:", err),
+        // The delivery seals when this handler returns — every Thread op must
+        // be awaited inside it, so the final update stays in the click path.
+        const outcome = approved
+          ? await fileToWorkspace(person, draft, context)
+          : "Held by the responder. Nothing was filed.";
+        await ctx.thread.update(
+          ctx.message.ref,
+          `${approved ? "✅ Approved." : "⏸ Held."} ${outcome}\n\n*Draft for ${person}:*\n${draft}`,
         );
       };
       previousReport = previousReport.then(report, report);
