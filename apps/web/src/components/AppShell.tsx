@@ -10,7 +10,7 @@ const workspaceLinks = [
   { index: "01", label: "Ask", href: "/ask" },
   { index: "02", label: "Graph", href: "/graph" },
   { index: "03", label: "Import", href: "/import" },
-  { index: "04", label: "Slack agent", href: "https://app.slack.com/client/T0C1GEULFA8", external: true },
+  { index: "04", label: "Slack agent", href: "https://app.slack.com/client/T0C1GEULFA8/C0C18B0T5NZ", external: true },
 ];
 
 interface AppShellProps {
