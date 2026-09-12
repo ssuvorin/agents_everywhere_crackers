@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "channels": [
+    {
+      "name": "second-brain",
+      "displayName": "Second Brain",
+      "providers": {
+        "slack": {
+          "env": {
+            "botToken": "INTELLIGENCE_CHANNEL_SECOND_BRAIN_SLACK_BOT_TOKEN",
+            "signingSecret": "INTELLIGENCE_CHANNEL_SECOND_BRAIN_SLACK_SIGNING_SECRET"
+          }
+        }
+      }
+    },
+    {
+      "name": "career-brain",
+      "displayName": "Career Brain",
+      "providers": {
+        "slack": {
+          "env": {
+            "botToken": "INTELLIGENCE_CHANNEL_CAREER_BRAIN_SLACK_BOT_TOKEN",
+            "signingSecret": "INTELLIGENCE_CHANNEL_CAREER_BRAIN_SLACK_SIGNING_SECRET"
+          }
+        }
+      }
+    }
+  ]
+}
