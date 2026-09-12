@@ -178,7 +178,7 @@ export default function GraphPage() {
   // Fit the whole ring layout into the stage once data lands.
   useEffect(() => {
     if (!graph) return;
-    const t = setTimeout(() => fgRef.current?.zoomToFit?.(600, 60), 400);
+    const t = setTimeout(() => fgRef.current?.zoomToFit?.(800, 80), 600);
     return () => clearTimeout(t);
   }, [graph]);
 
@@ -311,6 +311,7 @@ export default function GraphPage() {
               enableNodeDrag={true}
               enableZoomInteraction={true}
               enablePanInteraction={true}
+              onEngineStop={() => fgRef.current?.zoomToFit?.(800, 80)}
             />
 
             {selected && (
@@ -344,8 +345,10 @@ export default function GraphPage() {
               </div>
             )}
 
-            <a className="cb-chat-fab" href="/ask">
-              Ask Career Brain
+            <a className="cb-chat-fab" href="/ask" aria-label="Ask Career Brain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
             </a>
           </section>
         </div>
