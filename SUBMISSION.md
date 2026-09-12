@@ -9,24 +9,24 @@ Choose your city on the [global event page](https://aitinkerers.org/hackathons/g
 - [ ] We identify inherited templates, libraries, prompts, components, and starter code separately from our event work
 
 **What we inherited**
-<!-- Include this starter kit and any reused examples. -->
+CopilotKit `agents-everywhere-starter-kit` @6443333 — the whole repo skeleton: `createChannel` wiring, `read_thread`/`propose_action`/`search_web` tools, `incident_card`/`timeline` components, agent-core plumbing (model, MCP client, capabilities), web/mobile templates, dev-docs. Committed as the `Baseline` commit; `git diff baseline..HEAD` is exactly our event work.
 
 **What we built during the hackathon**
-<!-- Describe the new core interaction and point to its implementation. Running the supplied incident demo alone does not establish a new project. -->
+Career Brain — a relationship agent for Slack threads. New: `CRM_ROLE` prompt (read thread → spot signal → card → draft → stop), `opportunity_card` component with typed signals, `propose_followup` tool whose Approve click writes to Ambiguous REST (CRM contact + activity + task) from the channel listener, `post_digest` webhook tool, `career-brain` channel config + Slack app manifest, `SPEC.md`. See `apps/channel/src/tools.tsx`, `components.tsx`, `packages/agent-core/src/prompt.ts`.
 
 ## Title and description
 
 **What you built**
-<!-- Explain the complete interaction your demo shows. -->
+An agent that lives in a working Slack thread, reads the conversation it was called into, detects a relationship signal (raise, launch, intro promised, deadline), posts a native opportunity card, drafts the follow-up on click, and — on Approve — files it into an Ambiguous workspace as a CRM contact, logged activity, and follow-up task that survives refresh.
 
 **Who it is for**
-<!-- Name a person in a concrete situation. -->
+A founder/BD person whose network lives in Slack threads: they discuss "Anna raised a round, I promised an intro" at 2pm and forget by Friday.
 
 **Why the context matters**
-<!-- What did the agent know or do because it lived in this surface? -->
+The agent's value is the ambient thread: contact, signal, and who promised what are already in the conversation. A standalone chatbox would need all of that re-typed — the thread IS the input. The nudge lands in the same thread where the promise was made.
 
 **Sponsor technologies used**
-<!-- Name the tools you actually used and the visible contribution of each. -->
+CopilotKit Channels (managed Slack socket, native cards, button interactions), OpenAI via OpenRouter (agent model), Exa (`search_web` contact enrichment), Ambiguous AI (approve→workspace persistence: CRM + task).
 
 ## Evidence for the judging criteria
 
