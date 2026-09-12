@@ -1,0 +1,166 @@
+/* Career Brain graph page — supplements ported theblock globals.css.
+   Tokens (--bg, --bd, --acc, …) come from tokens.css. */
+
+.cb-page {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+
+.cb-graph-grid {
+  display: block;
+  border: 1px solid var(--bd);
+  background: var(--lowest);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.cb-stage {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-right: 0;
+}
+.cb-stage canvas {
+  display: block;
+}
+
+.cb-legend {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  z-index: 2;
+  display: flex;
+  gap: 16px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+.cb-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cb-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.cb-detail {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 2;
+  width: 340px;
+  background: var(--lowest);
+  border: 1px solid var(--bd);
+  border-left: 3px solid var(--acc);
+  padding: 16px 20px;
+}
+.cb-detail-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accL);
+}
+.cb-detail h2 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 8px 0 4px;
+}
+.cb-detail-role {
+  color: var(--fgv);
+  font-size: 13px;
+  margin: 0;
+}
+.cb-detail-facts {
+  display: flex;
+  gap: 24px;
+  margin: 12px 0 0;
+}
+.cb-detail-facts dt {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+.cb-detail-facts dd {
+  margin: 4px 0 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+}
+.cb-detail-sample {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--mut);
+  font-style: italic;
+  border-top: 1px solid var(--bd);
+  padding-top: 12px;
+}
+
+.cb-rail-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--bd);
+}
+.cb-rail-header h2 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.cb-rail-header p {
+  font-size: 12px;
+  color: var(--mut);
+  margin: 6px 0 0;
+}
+
+/* ── floating chat ── */
+.cb-chat-fab {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 3;
+  background: var(--acc);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 0 18px;
+  height: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.cb-chat-fab:hover {
+  background: var(--accL);
+}
+.cb-chat-pop {
+  position: absolute;
+  right: 20px;
+  bottom: 72px;
+  z-index: 3;
+  width: 380px;
+  height: min(560px, calc(100% - 120px));
+  display: flex;
+  flex-direction: column;
+  background: var(--lowest);
+  border: 1px solid var(--bds);
+}
+.cb-chat-pop .ck-chat {
+  flex: 1;
+  min-height: 0;
+}

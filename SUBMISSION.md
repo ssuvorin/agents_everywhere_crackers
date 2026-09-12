@@ -12,13 +12,12 @@ Choose your city on the [global event page](https://aitinkerers.org/hackathons/g
 CopilotKit `agents-everywhere-starter-kit` @6443333 — the whole repo skeleton: `createChannel` wiring, `read_thread`/`propose_action`/`search_web` tools, `incident_card`/`timeline` components, agent-core plumbing (model, MCP client, capabilities), web/mobile templates, dev-docs. Committed as the `Baseline` commit; `git diff baseline..HEAD` is exactly our event work.
 
 **What we built during the hackathon**
-Career Brain — a relationship agent for Slack threads. New: `CRM_ROLE` prompt (read thread → spot signal → card → draft → stop), `opportunity_card` component with typed signals, `propose_followup` tool whose Approve click writes to Ambiguous REST (CRM contact + activity + task) from the channel listener, `post_digest` webhook tool, `career-brain` channel config + Slack app manifest, `SPEC.md`. See `apps/channel/src/tools.tsx`, `components.tsx`, `packages/agent-core/src/prompt.ts`.
+Career Brain — a relationship agent that lives in Slack threads and a companion web app. Channel: `CRM_ROLE` prompt (read thread → spot signal → card → draft → stop), `opportunity_card` component with typed signals, `propose_followup` tool whose Approve click writes to Ambiguous REST (CRM contact + activity + task) from the channel listener, `post_digest` webhook tool, `career-brain` channel config + Slack app manifest. Web app (`apps/web/`): `/import` — LinkedIn data-export zip → parsed contacts + messages → relationship graph + OpenRouter embeddings; `/graph` — interactive force graph (theblock brandbook, drag/zoom, identicon avatars); `/ask` — CopilotKit chat with the graph as agent context + `search_messages` semantic search over the embedded index + `send_to_slack` tool. See `apps/channel/src/tools.tsx`, `components.tsx`, `packages/agent-core/src/prompt.ts`, `apps/web/src/app/`.
 
 ## Title and description
 
 **What you built**
-An agent that lives in a working Slack thread, reads the conversation it was called into, detects a relationship signal (raise, launch, intro promised, deadline), posts a native opportunity card, drafts the follow-up on click, and — on Approve — files it into an Ambiguous workspace as a CRM contact, logged activity, and follow-up task that survives refresh.
-
+A relationship agent that works two ways. In Slack: it reads the thread it was called into, detects a signal (raise, launch, intro promised, deadline), posts a native opportunity card, drafts the follow-up on click, and — on Approve — files it into an Ambiguous workspace as CRM contact + activity + task. In the web app: import a LinkedIn data-export zip → it builds a relationship graph with embeddings, and the `/ask` chat answers "who is going cold" and "what did we actually discuss" via semantic search over the message index — then pushes a drafted follow-up to Slack for approval.
 **Who it is for**
 A founder/BD person whose network lives in Slack threads: they discuss "Anna raised a round, I promised an intro" at 2pm and forget by Friday.
 
@@ -26,7 +25,7 @@ A founder/BD person whose network lives in Slack threads: they discuss "Anna rai
 The agent's value is the ambient thread: contact, signal, and who promised what are already in the conversation. A standalone chatbox would need all of that re-typed — the thread IS the input. The nudge lands in the same thread where the promise was made.
 
 **Sponsor technologies used**
-CopilotKit Channels (managed Slack socket, native cards, button interactions), OpenAI via OpenRouter (agent model), Exa (`search_web` contact enrichment), Ambiguous AI (approve→workspace persistence: CRM + task).
+CopilotKit Channels (managed Slack socket, native cards, button interactions) + CopilotKit React (in-app agentic chat, `useAgentContext`, `useFrontendTool`, `useConfigureSuggestions`), OpenAI via OpenRouter (agent model + `openai/text-embedding-3-small` for the message index), Exa (`search_web` contact enrichment), Ambiguous AI (approve→workspace persistence: CRM + task).
 
 ## Evidence for the judging criteria
 

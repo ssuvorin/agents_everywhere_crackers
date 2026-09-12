@@ -1,0 +1,48 @@
+/* Ask page — Career Brain brandbook */
+
+.cb-ask-page {
+  padding: 24px;
+  height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.cb-ask-panel {
+  background: transparent;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  /* CopilotKit chat on the dark brandbook theme */
+  --background: var(--lowest);
+  --foreground: var(--fg);
+  --card: var(--low);
+  --card-foreground: var(--fg);
+  --popover: var(--low);
+  --popover-foreground: var(--fg);
+  --primary: var(--acc);
+  --primary-foreground: #ffffff;
+  --secondary: var(--high);
+  --secondary-foreground: var(--fg);
+  --muted: var(--low);
+  --muted-foreground: var(--mut);
+  --accent: var(--wash);
+  --accent-foreground: var(--accL);
+  --border: var(--bd);
+  --input: var(--low);
+  --ring: var(--acc);
+  color-scheme: dark;
+}
+
+.cb-ask-panel .ck-chat {
+  background: transparent;
+  color: var(--fg);
+}
+
+.cb-ask-chat {
+  flex: 1;
+  min-height: 480px;
+}
