@@ -22,6 +22,7 @@ import {
 import type { InteractionContext } from "@copilotkit/channels";
 export { searchTheWeb } from "./search";
 import { z } from "zod";
+import { readFile } from "node:fs/promises";
 
 /**
  * Read the incident context already present in the conversation.
@@ -282,5 +283,82 @@ export const postDigest = defineChannelTool({
       return `Webhook post failed: HTTP ${res.status}. Post the digest in this thread instead.`;
     }
     return "Digest posted to the channel.";
+  },
+});
+
+/**
+ * Look up contacts in the imported LinkedIn relationship graph — the same data
+ * the web app shows. Returns the owner profile plus matching contacts with
+ * LinkedIn URLs, so the agent can answer "who can help me move from product
+ * to project management" with real names, links, and a ready draft.
+ *
+ * The graph lives at apps/web/public/data/graph.json, written by the web
+ * importer. The channel process runs from apps/channel, hence the relative path.
+ */
+export const lookupNetwork = defineChannelTool({
+  name: "lookup_network",
+  description:
+    "Search the user's imported LinkedIn network. Call this for any question about who can help with a goal — a job move, an intro, a domain. Returns the owner's profile (whose graph it is) and matching contacts with names, roles, companies, LinkedIn URLs, and message counts. Always include the LinkedIn URL when you name someone.",
+  parameters: z.object({
+    query: z
+      .string()
+      .describe("What to look for — a role, company, domain, or name."),
+  }),
+  async handler({ query }) {
+    const graphPath = new URL(
+      "../../web/public/data/graph.json",
+      import.meta.url,
+    );
+    let graph: {
+      owner?: {
+        name: string;
+        headline: string;
+        summary: string;
+        industry: string;
+        location: string;
+        positions: { company: string; title: string }[];
+      };
+      nodes?: {
+        name: string;
+        type: string;
+        company: string;
+        position: string;
+        linkedin_url: string;
+        messages: number;
+        last_contact: string;
+      }[];
+    };
+    try {
+      graph = JSON.parse(await readFile(graphPath, "utf-8"));
+    } catch {
+      return "No relationship graph imported yet — run the LinkedIn import in the web app first.";
+    }
+    const q = query.toLowerCase();
+    const contacts = (graph.nodes ?? []).filter(
+      (n) =>
+        n.type === "contact" &&
+        [n.name, n.company, n.position]
+          .filter(Boolean)
+          .some((f) => f.toLowerCase().includes(q)),
+    );
+    // If nothing matches the query, return the warmest contacts — the agent
+    // can still reason over who might help.
+    const pool = contacts.length
+      ? contacts
+      : (graph.nodes ?? [])
+          .filter((n) => n.type === "contact")
+          .sort((a, b) => b.messages - a.messages)
+          .slice(0, 15);
+    return {
+      owner: graph.owner ?? null,
+      matched: contacts.length,
+      contacts: pool.map((c) => ({
+        name: c.name,
+        role: [c.position, c.company].filter(Boolean).join(" · ") || "—",
+        linkedin: c.linkedin_url || "—",
+        messages: c.messages,
+        last_contact: c.last_contact || "—",
+      })),
+    };
   },
 });

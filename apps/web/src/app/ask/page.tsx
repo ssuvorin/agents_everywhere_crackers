@@ -17,17 +17,30 @@ type Contact = {
   name: string;
   company?: string;
   position?: string;
+  linkedin_url?: string;
   messages?: number;
   last_contact?: string;
 };
 
+type Owner = {
+  name: string;
+  headline: string;
+  summary: string;
+  industry: string;
+  location: string;
+  linkedin_url: string;
+  positions: { company: string; title: string; started: string; finished: string }[];
+};
+
 export default function AskPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [owner, setOwner] = useState<Owner | null>(null);
 
   useEffect(() => {
     fetch("/data/graph.json")
       .then((r) => r.json())
-      .then((g) =>
+      .then((g) => {
+        setOwner(g.owner ?? null);
         setContacts(
           g.nodes
             .filter((n: { type: string }) => n.type === "contact")
@@ -35,20 +48,21 @@ export default function AskPage() {
               name: n.name,
               company: n.company ?? "",
               position: n.position ?? "",
+              linkedin_url: n.linkedin_url ?? "",
               messages: n.messages ?? 0,
               last_contact: n.last_contact ?? "",
             })),
-        ),
-      )
+        );
+      })
       .catch(() => setContacts([]));
   }, []);
 
-  // The agent sees the whole graph as context on every turn.
+  // The agent sees the owner profile + the whole graph as context on every turn.
   useAgentContext({
     description:
-      "The user's LinkedIn relationship graph: Maya Haddad, a crypto PM in Dubai, and her contacts with message counts and last-contact dates. Use it to answer who is going cold, who to follow up with, and to draft follow-ups. For anything about what was actually said, call search_messages.",
+      "The user's LinkedIn relationship graph. `owner` is whose graph this is — their headline, summary, industry, location, and work history; use it to understand their goals (e.g. a career move) and who in the network can help. `contacts` are their connections with LinkedIn URLs, message counts, and last-contact dates. For anything about what was actually said, call search_messages. Always include a contact's linkedin_url when you name them.",
     value: {
-      owner: "Maya Haddad — crypto PM in Dubai",
+      owner,
       contacts,
     },
   });

@@ -16,11 +16,22 @@ export type Contact = {
   type: "me" | "contact";
   company: string;
   position: string;
+  linkedin_url: string;
   messages: number;
   last_contact: string;
   sample: string[];
 };
+export type OwnerProfile = {
+  name: string;
+  headline: string;
+  summary: string;
+  industry: string;
+  location: string;
+  linkedin_url: string;
+  positions: { company: string; title: string; started: string; finished: string }[];
+};
 export type GraphData = {
+  owner: OwnerProfile;
   nodes: Contact[];
   links: { source: string; target: string; weight: number }[];
 };
@@ -90,11 +101,10 @@ export function buildGraph(zip: Uint8Array): {
   const files = unzipSync(zip);
   const skipped: string[] = [];
 
-  // Connections.csv — first rows are a notes preamble, then the header.
   const connFile = Object.keys(files).find((f) => /connections\.csv$/i.test(f));
   const people = new Map<
     string,
-    { company: string; position: string; connected_on: string }
+    { company: string; position: string; connected_on: string; url: string }
   >();
   if (connFile) {
     const rows = parseCsv(strFromU8(files[connFile]));
@@ -102,6 +112,7 @@ export function buildGraph(zip: Uint8Array): {
     for (const r of rows.slice(headerIdx + 1)) {
       if (r.length >= 7 && r[0] && r[1]) {
         people.set(`${r[0]} ${r[1]}`, {
+          url: r[2] ?? "",
           company: r[4] ?? "",
           position: r[5] ?? "",
           connected_on: r[6] ?? "",
@@ -110,6 +121,49 @@ export function buildGraph(zip: Uint8Array): {
     }
   } else {
     skipped.push("Connections.csv");
+  }
+
+  // Profile.csv — the owner: headline, summary, industry, location.
+  const owner: OwnerProfile = {
+    name: OWNER,
+    headline: "",
+    summary: "",
+    industry: "",
+    location: "",
+    linkedin_url: "",
+    positions: [],
+  };
+  const profFile = Object.keys(files).find((f) => /(^|\/)profile\.csv$/i.test(f));
+  if (profFile) {
+    const rows = parseCsv(strFromU8(files[profFile]));
+    const header = rows[0] ?? [];
+    const col = (name: string) => header.indexOf(name);
+    const r = rows[1] ?? [];
+    owner.name = `${r[col("First Name")] ?? ""} ${r[col("Last Name")] ?? ""}`.trim() || OWNER;
+    owner.headline = r[col("Headline")] ?? "";
+    owner.summary = r[col("Summary")] ?? "";
+    owner.industry = r[col("Industry")] ?? "";
+    owner.location = r[col("Geo Location")] ?? r[col("Address")] ?? "";
+  } else {
+    skipped.push("Profile.csv");
+  }
+
+  // Positions.csv — work history, most recent first.
+  const posFile = Object.keys(files).find((f) => /positions\.csv$/i.test(f));
+  if (posFile) {
+    const rows = parseCsv(strFromU8(files[posFile]));
+    const header = rows[0] ?? [];
+    const col = (name: string) => header.indexOf(name);
+    for (const r of rows.slice(1)) {
+      if (r[col("Company Name")]) {
+        owner.positions.push({
+          company: r[col("Company Name")] ?? "",
+          title: r[col("Title")] ?? "",
+          started: r[col("Started On")] ?? "",
+          finished: r[col("Finished On")] ?? "",
+        });
+      }
+    }
   }
 
   // messages.csv — interaction counts, last date, samples.
@@ -122,18 +176,27 @@ export function buildGraph(zip: Uint8Array): {
     const rows = parseCsv(strFromU8(files[msgFile]));
     const header = rows[0];
     const col = (name: string) => header.indexOf(name);
-    const [cFrom, cTo, cDate, cContent] = [
+    const [cFrom, cTo, cDate, cContent, cFromUrl, cToUrl] = [
       col("FROM"),
       col("TO"),
       col("DATE"),
       col("CONTENT"),
+      col("SENDER PROFILE URL"),
+      col("RECIPIENT PROFILE URLS"),
     ];
+    const urls = new Map<string, string>();
     let id = 0;
     for (const r of rows.slice(1)) {
       const from = r[cFrom] ?? "";
       const to = r[cTo] ?? "";
-      const other = from === OWNER ? to : from;
-      if (!other || other === OWNER) continue;
+      const fromUrl = r[cFromUrl] ?? "";
+      const toUrl = (r[cToUrl] ?? "").split(";")[0]?.trim() ?? "";
+      if (from === owner.name && !owner.linkedin_url) owner.linkedin_url = fromUrl;
+      if (to === owner.name && !owner.linkedin_url) owner.linkedin_url = toUrl;
+      if (from !== owner.name && fromUrl) urls.set(from, fromUrl);
+      if (to !== owner.name && toUrl) urls.set(to, toUrl);
+      const other = from === owner.name ? to : from;
+      if (!other || other === owner.name) continue;
       const date = (r[cDate] ?? "").slice(0, 10);
       const content = r[cContent] ?? "";
       counts.set(other, (counts.get(other) ?? 0) + 1);
@@ -144,6 +207,12 @@ export function buildGraph(zip: Uint8Array): {
       if (content)
         messages.push({ id: id++, from, to, other, date, content });
     }
+    // Merge message-derived URLs into the people map (Connections.csv wins).
+    for (const [name, url] of urls) {
+      const p = people.get(name);
+      if (p && !p.url) p.url = url;
+      else if (!p) people.set(name, { company: "", position: "", connected_on: "", url });
+    }
   } else {
     skipped.push("messages.csv");
   }
@@ -153,10 +222,11 @@ export function buildGraph(zip: Uint8Array): {
   const nodes: Contact[] = [
     {
       id: "maya",
-      name: OWNER,
+      name: owner.name,
       type: "me",
-      company: "",
-      position: "PM · Crypto",
+      company: owner.positions[0]?.company ?? "",
+      position: owner.positions[0]?.title ?? "",
+      linkedin_url: owner.linkedin_url,
       messages: 0,
       last_contact: "",
       sample: [],
@@ -176,6 +246,7 @@ export function buildGraph(zip: Uint8Array): {
       type: "contact",
       company: p?.company ?? "",
       position: p?.position ?? "",
+      linkedin_url: p?.url ?? "",
       messages: cnt,
       last_contact: lastDate.get(name) ?? "",
       sample: (samples.get(name) ?? []).slice(0, 1),
@@ -195,6 +266,7 @@ export function buildGraph(zip: Uint8Array): {
       type: "contact",
       company: p.company,
       position: p.position,
+      linkedin_url: p.url,
       messages: 0,
       last_contact: p.connected_on,
       sample: [],
@@ -203,7 +275,7 @@ export function buildGraph(zip: Uint8Array): {
   }
 
   return {
-    graph: { nodes, links },
+    graph: { owner, nodes, links },
     messages,
     stats: {
       contacts: nodes.length - 1,

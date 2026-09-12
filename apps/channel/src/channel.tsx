@@ -3,7 +3,7 @@ import { isSearchConfigured, isWorkplaceConfigured, WORKPLACE_CONTEXT } from "ag
 import { makeChannelAgent } from "./agent";
 import { required } from "./env";
 import { IncidentCard, OpportunityCard, Timeline, welcomeMessage } from "./components";
-import { postDigest, proposeAction, proposeFollowup, readThread, searchTheWeb } from "./tools";
+import { postDigest, proposeAction, proposeFollowup, readThread, searchTheWeb, lookupNetwork } from "./tools";
 
 // Tools are registered only when their credential is present, so the agent is
 // never handed a tool that will fail when it calls it.
@@ -12,6 +12,7 @@ const tools = [
   proposeAction,
   proposeFollowup,
   postDigest,
+  lookupNetwork,
   ...(isSearchConfigured() ? [searchTheWeb] : []),
 ];
 
