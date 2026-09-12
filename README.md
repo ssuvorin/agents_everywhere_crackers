@@ -1,39 +1,42 @@
 # Career Brain
 
-**A relationship agent that lives in your Slack threads and catches the opportunities everyone forgets.**
+**A relationship agent that lives in your Slack threads and works your real LinkedIn network.**
 
-People discuss contacts, deals, intros, and follow-ups in threads every day — then lose them. Career Brain reads the thread it was called into, spots the signal (a raise, a launch, an intro offered, a deadline), posts a native opportunity card, and drafts the follow-up. Approve with one click and it files the draft into an Ambiguous AI workspace — CRM contact, activity, and follow-up task — where it survives refresh.
+You import your LinkedIn data export once — the web app unzips it, parses connections and messages, embeds the message index, and builds a relationship graph. Then in Slack you ask Career Brain who can help — a job move, an intro, a domain — and it answers with real names, roles, LinkedIn URLs, and message warmth from your own network. Ask for a follow-up and it drafts the message; Approve files it into an Ambiguous AI workspace — CRM contact, activity, and task — where it survives refresh.
 
 Built for [Agents, Everywhere](https://aitinkerers.org/hackathons/global/agents-everywhere) (Sept 12–13, 2026) on the CopilotKit starter kit. See [SPEC.md](SPEC.md) for the design and [SUBMISSION.md](SUBMISSION.md) for what is inherited vs. built during the event.
 
 ## The interaction
 
 ```
-#second-brain thread: "Anna just raised a round — didn't you promise her an intro?"
-        │
-        ▼  @career-brain
-read_thread ──► agent extracts contact + signal + who promised what
+LinkedIn export zip ──(web app: unzip → CSV parse → embeddings)──► graph.json + messages-index.json
+                                                                          │
+#second-brain Slack: "@career-brain who can help me get a PM role?"         │
+        │                                                                 │
+        ▼                                                                 │
+lookup_network ──► owner profile + matching contacts (role, company, warmth)
         │
         ▼
-opportunity_card ──► native Slack card: contact, signal, suggested action, [Draft] button
+answer: real names + LinkedIn URLs + why each fits
         │
-        ▼  click Draft
-agent writes the follow-up ──► propose_followup posts it for review
+        ▼  "draft a follow-up to Noura"
+propose_followup ──► draft posted for review
         │
-        ▼  click Approve
-fileToWorkspace ──► Ambiguous REST: CRM contact + activity + task (persists, survives refresh)
+        ▼  click Approve & file
+fileToWorkspace ──► Ambiguous REST: CRM contact + activity + task (persists)
 ```
 
-`post_digest` posts standalone weekly opportunity digests to the channel via incoming webhook — the proactive nudge path outside any thread.
+`post_digest` posts standalone opportunity digests to the channel via incoming webhook. `opportunity_card` renders native signal cards in-thread.
+
 
 ## Stack
-
 | Piece | Role |
 |---|---|
 | CopilotKit Channels | Managed Slack socket — no tunnel, no Slack app hosting |
-| OpenAI / OpenRouter | Agent model (`MODEL_PROVIDER` + `MODEL` in `.env`) |
-| Exa | `search_web` enrichment — public info on a contact/company, sources on the card |
+| OpenAI / OpenRouter | Agent model + message embeddings (`MODEL_PROVIDER` + `MODEL`) |
+| Exa | `search_web` enrichment — public info on a contact/company |
 | Ambiguous AI | Workspace write target — approved drafts become CRM contact + activity + task |
+| LinkedIn data export | The relationship graph — parsed + embedded in the web importer |
 
 ## Setup
 
