@@ -16,6 +16,27 @@ systemd **user** services so they survive reboots and SSH disconnects
 `/api/graph-image` from the web app, and its default is `:3100` (local dev).
 `PORT=3001` keeps the listener's CopilotRuntime endpoint off the web port.
 
+## Pitch deck
+
+`deck/` is static — no build, no unit. Caddy serves it directly:
+
+```sh
+rsync -az --delete deck/ hermes-vps:~/career-brain/deck/
+```
+
+Caddyfile block (already in place):
+
+```
+deck.13.143.65.45.sslip.io {
+	root * /home/ssuvorin/career-brain/deck
+	file_server
+}
+```
+
+Live at https://deck.13.143.65.45.sslip.io — independent of the cloudflared
+quick-tunnel (which only fronts :3000 and rotates its URL on restart).
+Requires `chmod o+x /home/ssuvorin` so the `caddy` user can traverse the path.
+
 ## Ship an update
 
 ```sh
