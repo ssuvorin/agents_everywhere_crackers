@@ -26,7 +26,7 @@ propose_followup ──► draft posted for review
 fileToWorkspace ──► Ambiguous REST: CRM contact + activity + task (persists)
 ```
 
-`post_digest` posts standalone opportunity digests to the channel via incoming webhook. `opportunity_card` renders native signal cards in-thread.
+`post_digest` posts standalone opportunity digests to the channel via incoming webhook. `opportunity_card` renders native signal cards in-thread. `show_graph` posts a PNG of the relationship graph — identicon avatars, heat rings — with the named contacts highlighted in orange and everyone else dimmed, so "who can help" answers come with the picture.
 
 
 ## Stack
@@ -87,8 +87,8 @@ npm run verify      # 34 contract tests
 
 ## Repo layout
 
-- `apps/channel/` — the Slack channel: tools (`lookup_network`, `propose_followup`, `post_digest`, …), components, agent wiring
-- `apps/web/` — LinkedIn importer (`/import`), relationship graph, `/ask` chat with Exa + Ambiguous tools
+- `apps/channel/` — the Slack channel: tools (`lookup_network`, `show_graph`, `propose_followup`, `post_digest`, …), components, agent wiring
+- `apps/web/` — LinkedIn importer (`/import`), relationship graph, `/ask` chat with Exa + Ambiguous tools, `/api/graph-image` (PNG render for Slack)
 - `packages/agent-core/` — prompt (`CRM_ROLE`), model, Ambiguous MCP capability
 - `apps/mobile/` — starter-kit template, not part of this demo
 - `SPEC.md` — design doc, demo script, risks
