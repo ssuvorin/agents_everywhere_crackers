@@ -60,7 +60,7 @@ export default function AskPage() {
   // The agent sees the owner profile + the whole graph as context on every turn.
   useAgentContext({
     description:
-      "The user's LinkedIn relationship graph. `owner` is whose graph this is — their headline, summary, industry, location, and work history; use it to understand their goals (e.g. a career move) and who in the network can help. `contacts` are their connections with LinkedIn URLs, message counts, and last-contact dates. For anything about what was actually said, call search_messages. Always include a contact's linkedin_url when you name them.",
+      "The user's LinkedIn relationship graph. `owner` is whose graph this is — their headline, summary, industry, location, and work history; use it to understand their goals (e.g. a career move) and who in the network can help. `contacts` are their connections with LinkedIn URLs, message counts, and last-contact dates. For anything about what was actually said, call search_messages. REQUIRED OUTPUT FORMAT: when you name a contact, always render them as `Name — role · company — linkedin_url` so the user can click through.",
     value: {
       owner,
       contacts,
@@ -107,6 +107,54 @@ export default function AskPage() {
         });
         const json = await res.json();
         return res.ok ? "Posted to Slack." : (json.error ?? "Slack failed");
+      },
+    },
+    [],
+  );
+
+  // Exa: current public info on a contact — role changes, news, company.
+  useFrontendTool(
+    {
+      name: "enrich_contact",
+      description:
+        "Look up current public info on a contact — their present role, company news, anything the graph doesn't know yet. Use when the graph data looks stale or the question is about what someone does now.",
+      parameters: z.object({
+        name: z.string().describe("The contact's name."),
+        company: z.string().optional().describe("Their company, if known."),
+      }),
+      handler: async ({ name, company }) => {
+        const res = await fetch("/api/enrich", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind: "contact", name, company }),
+        });
+        const json = await res.json();
+        if (!res.ok) return json.error ?? "Enrichment unavailable";
+        return json.results;
+      },
+    },
+    [],
+  );
+
+  // Exa: live job postings matching a career goal.
+  useFrontendTool(
+    {
+      name: "search_jobs",
+      description:
+        "Search live job postings that fit the owner's goal — e.g. 'project manager fintech Dubai'. Use when the question is about openings, not people.",
+      parameters: z.object({
+        query: z.string().describe("The role or field to search for."),
+        location: z.string().optional().describe("City or region."),
+      }),
+      handler: async ({ query, location }) => {
+        const res = await fetch("/api/enrich", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind: "jobs", query, location }),
+        });
+        const json = await res.json();
+        if (!res.ok) return json.error ?? "Job search unavailable";
+        return json.results;
       },
     },
     [],
