@@ -39,11 +39,14 @@ export function workplaceMcpServers(): MCPClientConfig[] {
       type: "http",
       url: AMBIGUOUS_MCP_URL,
       options: {
-        fetch: (url, init) =>
-          fetch(url, {
-            ...init,
-            headers: { ...init?.headers, Authorization: `Bearer ${apiKey}` },
-          }),
+        fetch: (url, init) => {
+          // init.headers may be a Headers instance — spreading it yields {}.
+          // Merge via the Headers API so Content-Type survives, or the server
+          // rejects every POST with 415 Unsupported Media Type.
+          const headers = new Headers(init?.headers);
+          headers.set("Authorization", `Bearer ${apiKey}`);
+          return fetch(url, { ...init, headers });
+        },
       },
     },
   ];
