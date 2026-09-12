@@ -54,10 +54,12 @@ export const channel = createChannel({
 // A mention subscribes the conversation, so the agent then follows along instead
 // of needing to be @-mentioned every single turn.
 channel.onMention(async ({ thread }) => {
-  console.log(`[channel] mention in ${thread.id} — subscribing + running`);
+  console.log(`[channel] mention — subscribing + running`);
   await thread.subscribe();
   try {
+    console.log(`[channel] runAgent start`);
     await thread.runAgent();
+    console.log(`[channel] runAgent done`);
   } catch (err) {
     console.error(`[channel] runAgent failed:`, err);
     await thread.post("Something broke on my side — check the listener logs.");
@@ -68,10 +70,12 @@ channel.onMention(async ({ thread }) => {
 // agent will answer every message in every channel it has been invited to.
 channel.onMessage(async ({ thread }) => {
   const subscribed = await thread.isSubscribed();
-  console.log(`[channel] message in ${thread.id} — subscribed=${subscribed}`);
+  console.log(`[channel] message — subscribed=${subscribed}`);
   if (subscribed) {
     try {
+      console.log(`[channel] runAgent start`);
       await thread.runAgent();
+      console.log(`[channel] runAgent done`);
     } catch (err) {
       console.error(`[channel] runAgent failed:`, err);
     }

@@ -81,5 +81,7 @@ export class ChannelRunAgent extends AbstractAgent {
 }
 
 export function makeChannelAgent(threadId: string) {
-  return new ChannelRunAgent(makeAgent, threadId);
+  // The channel writes to Ambiguous via propose_followup's REST path, not MCP —
+  // the workplace MCP server hangs the agent on connect, so disable it here.
+  return new ChannelRunAgent((id) => makeAgent(id, { workplace: false }), threadId);
 }
