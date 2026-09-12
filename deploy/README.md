@@ -18,23 +18,22 @@ systemd **user** services so they survive reboots and SSH disconnects
 
 ## Pitch deck
 
-`deck/` is static — no build, no unit. Caddy serves it directly:
+`deck/` is static — no build, no unit. Two ways to reach it:
+
+**Through the web app (recommended for sharing):** `~/career-brain/deck` is
+symlinked into `apps/web/public/deck`, so Next serves it at `/deck/` — same
+origin as the app, same Cloudflare tunnel URL, no extra infra. After rsyncing
+a new deck version, `systemctl --user restart career-brain-web` (Next caches
+the public dir listing at boot).
 
 ```sh
 rsync -az --delete deck/ hermes-vps:~/career-brain/deck/
+ssh hermes-vps 'systemctl --user restart career-brain-web'
 ```
 
-Caddyfile block (already in place):
-
-```
-deck.13.143.65.45.sslip.io {
-	root * /home/ssuvorin/career-brain/deck
-	file_server
-}
-```
-
-Live at https://deck.13.143.65.45.sslip.io — independent of the cloudflared
-quick-tunnel (which only fronts :3000 and rotates its URL on restart).
+**Direct via Caddy:** `deck.13.143.65.45.sslip.io` serves the same dir with
+`file_server` — independent of the tunnel, but the sslip cert can trip
+corporate SSL inspection (Fortinet). Prefer the tunnel URL for judges.
 Requires `chmod o+x /home/ssuvorin` so the `caddy` user can traverse the path.
 
 ## Ship an update
