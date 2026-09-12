@@ -205,13 +205,29 @@ export const proposeFollowup = defineChannelTool({
     ) => {
       const report = async () => {
         if (settled) return;
-        settled = true;
-        const outcome = approved
-          ? await fileToWorkspace(person, draft, context)
-          : "Held by the responder. Nothing was filed.";
+        // Instant ack: replace the card before the slow workspace writes.
+        // Without this the click sits on a spinner for seconds while three
+        // Ambiguous calls run, looks dead, and users click again. If this
+        // update throws, `settled` stays false and a re-click can retry.
         await ctx.thread.update(
           ctx.message.ref,
-          `${approved ? "✅ Approved." : "⏸ Held."} ${outcome}\n\n*Draft for ${person}:*\n${draft}`,
+          approved
+            ? `⏳ Filing the follow-up for ${person} to the workspace…`
+            : `⏸ Holding the follow-up for ${person}…`,
+        );
+        settled = true;
+        // Detached: the click ack must not wait on Ambiguous. The final
+        // update lands when the writes finish.
+        void (async () => {
+          const outcome = approved
+            ? await fileToWorkspace(person, draft, context)
+            : "Held by the responder. Nothing was filed.";
+          await ctx.thread.update(
+            ctx.message.ref,
+            `${approved ? "✅ Approved." : "⏸ Held."} ${outcome}\n\n*Draft for ${person}:*\n${draft}`,
+          );
+        })().catch((err) =>
+          console.error("[followup] decision report failed:", err),
         );
       };
       previousReport = previousReport.then(report, report);
