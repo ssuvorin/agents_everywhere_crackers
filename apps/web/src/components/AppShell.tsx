@@ -10,7 +10,7 @@ const workspaceLinks = [
   { index: "01", label: "Ask", href: "/ask" },
   { index: "02", label: "Graph", href: "/graph" },
   { index: "03", label: "Import", href: "/import" },
-  { index: "04", label: "Slack agent", href: "/graph#slack" },
+  { index: "04", label: "Slack agent", href: "https://app.slack.com/client/T0C1GEULFA8", external: true },
 ];
 
 interface AppShellProps {
@@ -23,8 +23,22 @@ function NavItem({
   index,
   label,
   href,
+  external,
   active,
 }: (typeof workspaceLinks)[number] & { active: boolean }) {
+  if (external) {
+    return (
+      <a
+        className={cx("nav-link", active && "nav-link-active")}
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span className="nav-index">{index}</span>
+        <span className="nav-link-label">{label}</span>
+      </a>
+    );
+  }
   return (
     <Link
       className={cx("nav-link", active && "nav-link-active")}
@@ -53,7 +67,7 @@ export function AppShell({ title, children, topbarMeta }: AppShellProps) {
             <NavItem
               key={link.href}
               {...link}
-              active={pathname.startsWith("/graph")}
+              active={!link.external && pathname.startsWith(link.href)}
             />
           ))}
         </nav>
