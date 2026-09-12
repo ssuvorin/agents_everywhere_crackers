@@ -362,3 +362,46 @@ export const lookupNetwork = defineChannelTool({
     };
   },
 });
+
+/**
+ * Render the relationship graph as a PNG with the named contacts highlighted
+ * (orange) and the rest dimmed, then post it to the thread. The agent calls
+ * this after lookup_network when the user asks "who can help" — the picture
+ * makes the answer land.
+ */
+export const showGraph = defineChannelTool({
+  name: "show_graph",
+  description:
+    "Post a picture of the user's relationship graph with the named contacts highlighted in orange and everyone else dimmed. Call this after lookup_network whenever you name specific people — the visual makes the answer concrete. Pass the exact names from the lookup results.",
+  parameters: z.object({
+    names: z
+      .array(z.string())
+      .min(1)
+      .max(5)
+      .describe("The contact names to highlight, exactly as returned by lookup_network."),
+    caption: z
+      .string()
+      .describe("One line under the image, e.g. '3 people who can help with the PM move'."),
+  }),
+  async handler({ names, caption }, { thread }) {
+    const base = process.env.WEB_BASE_URL ?? "http://127.0.0.1:3100";
+    const url = `${base}/api/graph-image?highlight=${encodeURIComponent(names.join(","))}`;
+    let png: Buffer;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      png = Buffer.from(await res.arrayBuffer());
+    } catch (e) {
+      return `Graph image failed: ${e instanceof Error ? e.message : e}. Answer in text instead.`;
+    }
+    const posted = await thread.postFile({
+      bytes: new Uint8Array(png),
+      filename: "graph.png",
+      title: caption,
+    });
+    if (!posted.ok) {
+      return `Image upload failed: ${posted.error}. Answer in text instead.`;
+    }
+    return `Graph image posted with ${names.length} contact(s) highlighted.`;
+  },
+});
