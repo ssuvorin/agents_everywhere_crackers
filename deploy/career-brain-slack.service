@@ -1,0 +1,15 @@
+[Unit]
+Description=Career Brain Slack channel listener
+After=network.target career-brain-web.service
+
+[Service]
+WorkingDirectory=%h/career-brain/apps/channel
+Environment=PORT=3001
+Environment=WEB_BASE_URL=http://127.0.0.1:3000
+Environment=TSX_TSCONFIG_PATH=tsconfig.json
+ExecStart=/usr/bin/node --env-file=%h/career-brain/.env --import tsx src/server.ts
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

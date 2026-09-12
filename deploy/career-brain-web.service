@@ -1,0 +1,12 @@
+[Unit]
+Description=Career Brain web app (Next.js)
+After=network.target
+
+[Service]
+WorkingDirectory=%h/career-brain/apps/web
+ExecStart=/usr/bin/node --env-file-if-exists=%h/career-brain/.env %h/career-brain/node_modules/next/dist/bin/next start -p 3000 -H 0.0.0.0
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
