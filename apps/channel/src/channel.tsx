@@ -56,7 +56,12 @@ export const channel = createChannel({
 channel.onMention(async ({ thread }) => {
   console.log(`[channel] mention in ${thread.id} — subscribing + running`);
   await thread.subscribe();
-  await thread.runAgent();
+  try {
+    await thread.runAgent();
+  } catch (err) {
+    console.error(`[channel] runAgent failed:`, err);
+    await thread.post("Something broke on my side — check the listener logs.");
+  }
 });
 
 // Non-mentioned turns only ever reach onMessage — gate them on the flag or the
@@ -65,7 +70,11 @@ channel.onMessage(async ({ thread }) => {
   const subscribed = await thread.isSubscribed();
   console.log(`[channel] message in ${thread.id} — subscribed=${subscribed}`);
   if (subscribed) {
-    await thread.runAgent();
+    try {
+      await thread.runAgent();
+    } catch (err) {
+      console.error(`[channel] runAgent failed:`, err);
+    }
   }
 });
 

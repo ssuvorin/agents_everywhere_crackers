@@ -1,5 +1,12 @@
 /* Import page — Career Brain brandbook, same tokens as graph.css */
 
+
+.cb-page {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .cb-import-panel {
   border: 1px solid var(--bd);
   background: var(--lowest);

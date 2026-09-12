@@ -67,11 +67,16 @@ The Slack app manifest is [career-brain-manifest.txt](career-brain-manifest.txt)
 
 ## Run
 
+Two processes:
+
 ```bash
-npm run dev:slack
+npm run dev:slack   # Slack listener — the agent (Node 22+ required)
+npm run dev:web     # web app on :3100 — LinkedIn import, graph, /ask chat
 ```
 
-Then in Slack: `/invite @career-brain` into a channel, have a real conversation about a contact in a thread, and `@career-brain` inside that thread. A mention subscribes the agent to the thread — it follows along without needing a mention every turn.
+**Web app** (`http://localhost:3100`): `/import` accepts a LinkedIn data-export zip → builds `graph.json` + embedded `messages-index.json`. `/ask` is a chat over that graph with tools: `search_messages` (semantic), `enrich_contact` + `search_jobs` (Exa), `send_to_slack`, `file_to_workspace` (Ambiguous).
+
+**Slack**: `/invite @career-brain` into a channel, then `@career-brain` inside a thread — e.g. "who in my network can help me find a PM role?" A mention subscribes the agent to the thread; it answers with names, LinkedIn URLs, and message warmth from the imported graph.
 
 ## Verify
 
@@ -82,12 +87,13 @@ npm run verify      # 34 contract tests
 
 ## Repo layout
 
-- `apps/channel/` — the Slack channel: tools, components, agent wiring
-- `packages/agent-core/` — prompt (`CRM_ROLE`), model, capability detection
-- `apps/web/`, `apps/mobile/` — starter-kit templates, not part of this demo
+- `apps/channel/` — the Slack channel: tools (`lookup_network`, `propose_followup`, `post_digest`, …), components, agent wiring
+- `apps/web/` — LinkedIn importer (`/import`), relationship graph, `/ask` chat with Exa + Ambiguous tools
+- `packages/agent-core/` — prompt (`CRM_ROLE`), model, Ambiguous MCP capability
+- `apps/mobile/` — starter-kit template, not part of this demo
 - `SPEC.md` — design doc, demo script, risks
 - `SUBMISSION.md` — hackathon checklist: inherited vs. built, judging evidence
 
 ## Inherited vs. built
 
-Git history is two commits: `Baseline` (the starter kit tree, pre-event) and the event work on top. `git diff` between them is exactly what was built during the hackathon. Details in [SUBMISSION.md](SUBMISSION.md).
+Git history starts with `Baseline` (the starter kit tree, pre-event); every commit after it is event work. `git diff b668d9b..HEAD` is exactly what was built during the hackathon. Details in [SUBMISSION.md](SUBMISSION.md).
