@@ -54,6 +54,7 @@ export const channel = createChannel({
 // A mention subscribes the conversation, so the agent then follows along instead
 // of needing to be @-mentioned every single turn.
 channel.onMention(async ({ thread }) => {
+  console.log(`[channel] mention in ${thread.id} — subscribing + running`);
   await thread.subscribe();
   await thread.runAgent();
 });
@@ -61,7 +62,9 @@ channel.onMention(async ({ thread }) => {
 // Non-mentioned turns only ever reach onMessage — gate them on the flag or the
 // agent will answer every message in every channel it has been invited to.
 channel.onMessage(async ({ thread }) => {
-  if (await thread.isSubscribed()) {
+  const subscribed = await thread.isSubscribed();
+  console.log(`[channel] message in ${thread.id} — subscribed=${subscribed}`);
+  if (subscribed) {
     await thread.runAgent();
   }
 });

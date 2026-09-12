@@ -160,6 +160,33 @@ export default function AskPage() {
     [],
   );
 
+  // File an approved follow-up into the Ambiguous workspace.
+  useFrontendTool(
+    {
+      name: "file_to_workspace",
+      description:
+        "File an approved follow-up into the Ambiguous workspace: CRM contact + activity + task. Use only after the user approves a draft — never file without explicit approval.",
+      parameters: z.object({
+        person: z.string().describe("Who the follow-up is for."),
+        draft: z.string().describe("The approved follow-up message."),
+        context: z.string().optional().describe("One line of context."),
+        linkedin_url: z.string().optional().describe("Their LinkedIn URL."),
+      }),
+      handler: async ({ person, draft, context, linkedin_url }) => {
+        const res = await fetch("/api/workspace", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ person, draft, context, linkedin_url }),
+        });
+        const json = await res.json();
+        return res.ok
+          ? `Filed to workspace: CRM contact + task ${json.task_id}`
+          : (json.error ?? "Workspace write failed");
+      },
+    },
+    [],
+  );
+
   useConfigureSuggestions(
     {
       suggestions: [

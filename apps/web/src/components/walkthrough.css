@@ -1,0 +1,89 @@
+/* Demo walkthrough — floating hints, brandbook dark */
+
+.cb-walk-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--bds);
+  background: var(--low);
+  color: var(--mut);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.cb-walk-fab:hover {
+  color: var(--acc);
+  border-color: var(--acc);
+}
+
+.cb-walk-pop {
+  position: fixed;
+  right: 20px;
+  bottom: 68px;
+  z-index: 50;
+  width: 320px;
+  background: var(--lowest);
+  border: 1px solid var(--bds);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cb-walk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cb-walk-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+.cb-walk-close {
+  background: none;
+  border: 0;
+  color: var(--mut);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+.cb-walk-close:hover {
+  color: var(--fg);
+}
+
+.cb-walk-hint h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.cb-walk-hint p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mut);
+}
+
+.cb-walk-foot {
+  display: flex;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--bd);
+}
+.cb-walk-foot a {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--acc);
+  text-decoration: none;
+}
+.cb-walk-foot a:hover {
+  text-decoration: underline;
+}

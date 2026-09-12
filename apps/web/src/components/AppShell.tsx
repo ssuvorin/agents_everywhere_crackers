@@ -1,10 +1,9 @@
-"use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Avatar } from "@/components/ui/Avatar";
 import { cx } from "@/lib/cx";
+import { Avatar } from "@/components/ui/Avatar";
+import { Walkthrough } from "@/components/Walkthrough";
 
 const workspaceLinks = [
   { index: "01", label: "Ask", href: "/ask" },
@@ -86,6 +85,7 @@ export function AppShell({ title, children, topbarMeta }: AppShellProps) {
         </header>
         <main id="main-content">{children}</main>
       </div>
+      <Walkthrough />
     </div>
   );
 }
